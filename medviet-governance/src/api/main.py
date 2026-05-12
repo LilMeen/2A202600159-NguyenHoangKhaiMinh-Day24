@@ -19,7 +19,9 @@ async def get_raw_patients(
     Load từ data/raw/patients_raw.csv
     Trả về 10 records đầu tiên dưới dạng JSON.
     """
-    pass
+    df = pd.read_csv("data/raw/patients_raw.csv")
+    sample_data = df.head(10).to_dict(orient="records")
+    return JSONResponse(content=sample_data)
 
 # --- ENDPOINT 2 ---
 @app.get("/api/patients/anonymized")
@@ -31,7 +33,10 @@ async def get_anonymized_patients(
     TODO: Trả về anonymized data (ml_engineer và admin được phép).
     Load raw data → anonymize → trả về JSON.
     """
-    pass
+    df = pd.read_csv("data/raw/patients_raw.csv")
+    anonymized_df = anonymizer.anonymize(df)
+    sample_data = anonymized_df.head(10).to_dict(orient="records")
+    return JSONResponse(content=sample_data)
 
 # --- ENDPOINT 3 ---
 @app.get("/api/metrics/aggregated")
@@ -43,7 +48,9 @@ async def get_aggregated_metrics(
     TODO: Trả về aggregated metrics (data_analyst, ml_engineer, admin).
     Ví dụ: số bệnh nhân theo từng loại bệnh (không có PII).
     """
-    pass
+    df = pd.read_csv("data/raw/patient_metrics.csv")
+    agg_metrics = df.groupby("disease").size().reset_index(name="patient_count")
+    return JSONResponse(content=agg_metrics.to_dict(orient="records"))
 
 # --- ENDPOINT 4 ---
 @app.delete("/api/patients/{patient_id}")
@@ -55,7 +62,9 @@ async def delete_patient(
     """
     TODO: Chỉ admin được xóa. Các role khác nhận 403.
     """
-    pass
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can delete patient data")
+    return JSONResponse(content={"message": f"Patient {patient_id} deleted successfully"})
 
 @app.get("/health")
 async def health():

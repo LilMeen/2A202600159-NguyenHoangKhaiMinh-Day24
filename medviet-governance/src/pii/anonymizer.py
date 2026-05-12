@@ -13,6 +13,12 @@ class MedVietAnonymizer:
         self.analyzer = build_vietnamese_analyzer()
         self.anonymizer = AnonymizerEngine()
 
+    def _fake_cccd(self) -> str:
+        return str(fake.random_number(digits=12, fix_len=True))
+
+    def _fake_phone(self) -> str:
+        return "0" + str(fake.random_element(elements=[3, 5, 7, 8, 9])) + str(fake.random_number(digits=8, fix_len=True))
+
     def anonymize_text(self, text: str, strategy: str = "replace") -> str:
         """
         TODO: Anonymize text với strategy được chọn.
@@ -34,19 +40,33 @@ class MedVietAnonymizer:
             operators = {
                 "PERSON": OperatorConfig("replace", 
                           {"new_value": fake.name()}),
+                "VN_NAME": OperatorConfig("replace", 
+                          {"new_value": fake.name()}),
                 "EMAIL_ADDRESS": OperatorConfig("replace", 
-                                 {"new_value": ___}),   # TODO: fake email
+                                 {"new_value": fake.email()}),   # TODO: fake email
                 "VN_CCCD": OperatorConfig("replace", 
-                           {"new_value": ___}),          # TODO: fake CCCD
+                           {"new_value": self._fake_cccd()}),          # TODO: fake CCCD
                 "VN_PHONE": OperatorConfig("replace", 
-                            {"new_value": ___}),         # TODO: fake phone
+                            {"new_value": self._fake_phone()}),         # TODO: fake phone
             }
         elif strategy == "mask":
             # TODO: implement masking
-            pass
+            operators = {
+                "PERSON": OperatorConfig("mask", {"masking_char": "*", "chars_to_mask": 999, "from_end": False}),
+                "VN_NAME": OperatorConfig("mask", {"masking_char": "*", "chars_to_mask": 999, "from_end": False}),
+                "EMAIL_ADDRESS": OperatorConfig("mask", {"masking_char": "*", "chars_to_mask": 999, "from_end": False}),
+                "VN_CCCD": OperatorConfig("mask", {"masking_char": "*", "chars_to_mask": 12, "from_end": False}),
+                "VN_PHONE": OperatorConfig("mask", {"masking_char": "*", "chars_to_mask": 10, "from_end": False})
+            }
         elif strategy == "hash":
             # TODO: implement hashing dùng sha256
-            pass
+            operators = {
+                "PERSON": OperatorConfig("hash", {}),
+                "VN_NAME": OperatorConfig("hash", {}),
+                "EMAIL_ADDRESS": OperatorConfig("hash", {}),
+                "VN_CCCD": OperatorConfig("hash", {}),
+                "VN_PHONE": OperatorConfig("hash", {})
+            }
 
         anonymized = self.anonymizer.anonymize(
             text=text,
@@ -67,7 +87,10 @@ class MedVietAnonymizer:
 
         # TODO: Xử lý từng cột PII
         # Gợi ý: dùng df.apply() hoặc list comprehension
-
+        for col in ["ho_ten", "dia_chi", "email"]:
+            df_anon[col] = df_anon[col].astype(str).apply(self.anonymize_text)
+        df_anon["cccd"] = df_anon["cccd"].apply(lambda _: self._fake_cccd())
+        df_anon["so_dien_thoai"] = df_anon["so_dien_thoai"].apply(lambda _: self._fake_phone())
         return df_anon
 
     def calculate_detection_rate(self, 
@@ -86,7 +109,13 @@ class MedVietAnonymizer:
         for col in pii_columns:
             for value in original_df[col].astype(str):
                 total += 1
-                results = detect_pii(value, self.analyzer)
+                value_str = value
+                if col == "cccd" and value_str.isdigit():
+                    value_str = value_str.zfill(12)
+                elif col == "so_dien_thoai" and value_str.isdigit():
+                    value_str = value_str.zfill(10)
+
+                results = detect_pii(value_str, self.analyzer)
                 if len(results) > 0:
                     detected += 1
 

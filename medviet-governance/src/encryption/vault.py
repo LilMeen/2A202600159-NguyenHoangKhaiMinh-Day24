@@ -6,6 +6,8 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 
+import pandas as pd
+
 class SimpleVault:
     """
     Mô phỏng envelope encryption pattern (thay thế AWS KMS cho local dev).
@@ -78,7 +80,7 @@ class SimpleVault:
         # TODO: encrypt data bằng plaintext_dek
         aesgcm = AESGCM(plaintext_dek)
         nonce = os.urandom(12)
-        ciphertext = ___   # TODO
+        ciphertext = aesgcm.encrypt(nonce, plaintext.encode(), None)  # TODO
 
         # Xóa plaintext DEK
         del plaintext_dek
@@ -100,9 +102,9 @@ class SimpleVault:
         ciphertext_with_nonce = base64.b64decode(encrypted_payload["ciphertext"])
 
         # TODO: implement decryption
-        plaintext_dek = ___   # TODO
-        nonce = ___           # TODO (first 12 bytes)
-        ciphertext = ___      # TODO (remaining bytes)
+        plaintext_dek = self.decrypt_dek(encrypted_dek)
+        nonce = ciphertext_with_nonce[:12]
+        ciphertext = ciphertext_with_nonce[12:]
 
         aesgcm = AESGCM(plaintext_dek)
         plaintext = aesgcm.decrypt(nonce, ciphertext, None)

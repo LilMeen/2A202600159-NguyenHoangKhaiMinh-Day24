@@ -1,0 +1,16 @@
+D:\Dev\Repos\VinAI\Lab24\2A202600159-NguyenHoangKhaiMinh-Day24\medviet-governance>pytest tests/test_pii.py -v --tb=short
+=========================== test session starts ===========================
+platform win32 -- Python 3.11.9, pytest-8.3.5, pluggy-1.6.0 -- C:\Users\nhkmi\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Dev\Repos\VinAI\Lab24\2A202600159-NguyenHoangKhaiMinh-Day24\medviet-governance
+plugins: anyio-4.11.0, Faker-37.12.0, langsmith-0.7.3
+collected 6 items
+
+tests/test_pii.py::TestPIIDetection::test_cccd_detected PASSED       [ 16%]
+tests/test_pii.py::TestPIIDetection::test_phone_detected PASSED      [ 33%]
+tests/test_pii.py::TestPIIDetection::test_email_detected PASSED      [ 50%]
+tests/test_pii.py::TestPIIDetection::test_detection_rate_above_95_percent PASSED [ 66%]
+tests/test_pii.py::TestAnonymization::test_pii_not_in_output PASSED  [ 83%]
+tests/test_pii.py::TestAnonymization::test_non_pii_columns_unchanged PASSED [100%]
+
+=========================== 6 passed in 36.46s ============================

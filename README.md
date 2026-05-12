@@ -536,8 +536,7 @@ curl -H "Authorization: Bearer token-bob" http://localhost:8000/api/patients/raw
 curl -H "Authorization: Bearer token-alice" http://localhost:8000/api/patients/raw
 # → Phải trả về 200 (alice là admin)
 
-curl -X DELETE -H "Authorization: Bearer token-bob" \
-     http://localhost:8000/api/patients/abc123
+curl -X DELETE -H "Authorization: Bearer token-bob" http://localhost:8000/api/patients/abc123
 # → Phải trả về 403
 ```
 
@@ -802,8 +801,8 @@ git secrets --install
 # Thêm patterns cho VN context
 git secrets --add 'CCCD[:\s]+\d{12}'
 git secrets --add 'cccd[:\s]+\d{12}'
-git secrets --add 'password\s*=\s*["\'][^"\']+["\']'
-git secrets --add 'secret_key\s*=\s*["\'][^"\']+["\']'
+git secrets --add "password\s*=\s*['\"][^'\"]+['\"]"
+git secrets --add "secret_key\s*=\s*['\"][^'\"]+['\"]"
 
 # Thêm AWS patterns
 git secrets --register-aws
